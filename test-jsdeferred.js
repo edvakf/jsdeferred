@@ -419,7 +419,10 @@ next(function () {
 	var f = function(arg1, arg2, callback) {
 		callback(arg1 + arg2);
 	}
-	var fd = Deferred.bind(f, null, 2);
+
+	with (Deferred)
+	var fd = Deferred.bind(f)(_, _, ok);
+
 	return fd(2,3).next(function(r) {
 		expect('bind f', 5, r);
 	});
@@ -430,8 +433,22 @@ next(function () {
 			callback(arg1, arg2);
 		}, 10);
 	}
-	var fd = Deferred.bind(f, null, 2);
+	with (Deferred)
+	var fd = Deferred.bind(f)(_, _, ok);
 	return fd(2,3).next(function(r0, r1) {
+		expect('bind f', 2, r0);
+		expect('bind f', 3, r1);
+	});
+}).
+next(function () {
+	var f = function(arg1, arg2, callback) {
+		setTimeout(function() {
+			callback(arg1, arg2);
+		}, 10);
+	}
+	with (Deferred)
+	var fd = Deferred.bind(f)(2, _, ok);
+	return fd(3).next(function(r0, r1) {
 		expect('bind f', 2, r0);
 		expect('bind f', 3, r1);
 	});
@@ -442,7 +459,8 @@ next(function () {
 			errorback(arg1, arg2);
 		}, 10);
 	}
-	var fd = Deferred.bind(f, null, 2, 3);
+	with (Deferred)
+	var fd = Deferred.bind(f)(_, _, ok, ng);
 	return fd(2,3).error(function(r) {
 		expect('bind f errorback', 2, r[0]);
 		expect('bind f errorback', 3, r[1]);
@@ -456,19 +474,10 @@ next(function () {
 			callback(_this === self);
 		}, 10);
 	};
-	var fd = Deferred.bind(f, _this, 0);
+	with (Deferred)
+	var fd = Deferred.bind(f, _this)(ok);
 	return fd().next(function (r) {
 		expect("bind this", true, r);
-	});
-}).
-next(function () {
-	msg("Curry Tests::");
-	var f = function(callback, arg1, arg2) {
-		callback(arg1 + arg2);
-	}
-	var fd = Deferred.curry(f);
-	return fd(2, 3).next(function(r) {
-		expect('curry', 5, r);
 	});
 }).
 next(function () {

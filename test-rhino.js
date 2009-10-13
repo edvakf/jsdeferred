@@ -184,6 +184,9 @@ addFinalizer(function () {
 		protocol: "file:///"
 	};
 
+	var foo = function (a, b, cb, eb) {
+	}
+
 	// run process
 	while (runQueue.length) {
 		runQueue.process();
